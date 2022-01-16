@@ -88,7 +88,7 @@ const ProjectManager = {
     /**
      * Sauvegarde de fichier de configuration
      * @param { string } filename 
-     * @param { object } objectContent 
+     * @param { {} } objectContent 
      * @returns { fs.WriteStream }
      */
     SaveConfig(filename, objectContent){

@@ -36,6 +36,17 @@
  const ProgressBar = require('./ProgressBar');
  
 
+ const GraftScheme = {
+
+    options:{}, 
+    
+    /**
+     * @type { Array<string> }
+     */
+    items:[]
+    
+}
+
  
 
 
@@ -47,9 +58,6 @@
 function GratCSS(fn, files){
 
     const SensenCli = require('./Sensen.js');
-
-    
-
 
     switch(fn){
 
@@ -113,10 +121,24 @@ function GratCSS(fn, files){
 
                                 ProjectManager.SetDirectory(`assets/css/grafts/`)
 
-                                // console.log('Done', url, body)
-
                                 SetRawFile(`assets/css/grafts/${ filename }.css`, body.join(''))
 
+
+                                /**
+                                 * @type { GraftScheme }
+                                 */
+                                const store = ProjectManager.LoadConfig('graft.css', {options:{}, items:[]});
+
+                                store.items = (typeof store.items == 'object' && Array.isArray(store.items)) ? store.items : [];
+
+                                if(store.items.indexOf(filename) == -1){
+
+                                    store.items.push(filename);
+
+                                    ProjectManager.SaveConfig('graft.css', store)
+
+                                }
+                                
                                 setTimeout(()=>{
 
                                     loader.stop(); 
@@ -167,6 +189,21 @@ function GratCSS(fn, files){
 
             if(files.length){
 
+                /**
+                 * @type { GraftScheme }
+                 */
+                const store = ProjectManager.LoadConfig('graft.css', {options:{}, items:[]});
+
+                /**
+                 * @type { Array<string> }
+                 */
+                 store.items = (typeof store.items == 'object' && Array.isArray(store.items)) ? store.items : [];
+
+                const removed = [];
+
+                const output = [];
+                
+
                 files.forEach(file=>{
 
                     const ph = `${ process.cwd() }/assets/css/grafts/${ file }.css`;
@@ -176,6 +213,8 @@ function GratCSS(fn, files){
                         fs.unlinkSync(ph);
 
                         LogSuccess(`Rétiré`, `${ file }`)
+
+                        removed.push(file)
 
                     }
 
@@ -187,6 +226,19 @@ function GratCSS(fn, files){
                     
                     
                 })
+
+
+
+                if(store.items.length){
+
+                    store.items.forEach(item=>{ if(removed.indexOf(item) == -1){ output.push(item); } })
+
+                }
+
+                store.items = output;
+
+                ProjectManager.SaveConfig('graft.css', store)
+
 
             }
 
@@ -215,9 +267,6 @@ function GratCSS(fn, files){
 function GratJS(fn, files){
 
     const SensenCli = require('./Sensen.js');
-
-    
-
 
     switch(fn){
 
@@ -281,10 +330,24 @@ function GratJS(fn, files){
 
                                 ProjectManager.SetDirectory(`assets/js/grafts/`)
 
-                                // console.log('Done', url, body)
-
                                 SetRawFile(`assets/js/grafts/${ filename }.js`, body.join(''))
 
+
+                                /**
+                                 * @type { GraftScheme }
+                                 */
+                                const store = ProjectManager.LoadConfig('graft.js', {options:{}, items:[]});
+
+                                store.items = (typeof store.items == 'object' && Array.isArray(store.items)) ? store.items : [];
+
+                                if(store.items.indexOf(filename) == -1){
+
+                                    store.items.push(filename);
+
+                                    ProjectManager.SaveConfig('graft.js', store)
+
+                                }
+                                
                                 setTimeout(()=>{
 
                                     loader.stop(); 
@@ -335,6 +398,21 @@ function GratJS(fn, files){
 
             if(files.length){
 
+                /**
+                 * @type { GraftScheme }
+                 */
+                const store = ProjectManager.LoadConfig('graft.js', {options:{}, items:[]});
+
+                /**
+                 * @type { Array<string> }
+                 */
+                 store.items = (typeof store.items == 'object' && Array.isArray(store.items)) ? store.items : [];
+
+                const removed = [];
+
+                const output = [];
+                
+
                 files.forEach(file=>{
 
                     const ph = `${ process.cwd() }/assets/js/grafts/${ file }.js`;
@@ -344,6 +422,8 @@ function GratJS(fn, files){
                         fs.unlinkSync(ph);
 
                         LogSuccess(`Rétiré`, `${ file }`)
+
+                        removed.push(file)
 
                     }
 
@@ -355,6 +435,19 @@ function GratJS(fn, files){
                     
                     
                 })
+
+
+
+                if(store.items.length){
+
+                    store.items.forEach(item=>{ if(removed.indexOf(item) == -1){ output.push(item); } })
+
+                }
+
+                store.items = output;
+
+                ProjectManager.SaveConfig('graft.js', store)
+
 
             }
 
