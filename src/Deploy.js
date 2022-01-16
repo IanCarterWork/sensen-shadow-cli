@@ -26,6 +26,13 @@
 const SensenCli = require('./Sensen');
 
 
+const ProjectPaths = {
+
+    CacheDownloaded: '/.downloaded'
+    
+};
+
+
 
 /**
  * Deploy Project
@@ -35,7 +42,7 @@ const SensenCli = require('./Sensen');
 
     const $ProjectDir = `${ process.cwd() }/${ name }`;
     
-    const from = `${ $ProjectDir }/.sensen-cache${SensenCli.Paths.CacheDownloaded}`
+    const from = `${ $ProjectDir }/.sensen-cache${ ProjectPaths.CacheDownloaded }`
 
     const to = `${ $ProjectDir }`;
 

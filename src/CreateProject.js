@@ -3,29 +3,49 @@
  * Requires
  */
 
- require = require('esm')(module /*, options*/);
+require = require('esm')(module /*, options*/);
 
- const { exec } = require('child_process');
- 
- const fs = require('fs');
- 
- const fse = require('fs-extra');
- 
- const path = require('path');
- 
- const rimraf = require("rimraf");
+const { exec } = require('child_process');
+
+const fs = require('fs');
+
+const fse = require('fs-extra');
+
+const path = require('path');
+
+const rimraf = require("rimraf");
  
 const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
-
+const ProgressBar = require('./ProgressBar')
 
 
 /**
  * Sensen Dependencies
  */
- const SensenCli = require('./Sensen');
+const SensenCli = require('./Sensen');
+
+const Deploy = require('./Deploy');
+
+const BuildProjectDependencies = require('./BuildProjectDependencies');
 
 
+ const ProjectResposites = {
+
+     Default: {
+
+         URL: `https://github.com/IanCarterWork/sensen-shadow-project.git`
+
+     }
+     
+ };
+
+
+ const ProjectPaths = {
+
+     CacheDownloaded: '/.downloaded'
+     
+ };
 
 
  
@@ -38,12 +58,12 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
  */
  const CreateProject = function(name, template = null){
 
-    template = SensenCli.Resposites[template] ? template : 'Default';
+    template = ProjectResposites[template] ? template : 'Default';
 
     
     const $ProjectDir = `${ process.cwd() }/${ name }`;
     
-    const tpl = SensenCli.Resposites[template] || SensenCli.Resposites.Default
+    const tpl = ProjectResposites[template] || ProjectResposites.Default
 
 
 
@@ -63,7 +83,7 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
                 const step = 3
 
-                const cmd = `git clone ${ tpl.URL } ${ $ProjectDir }/.sensen-cache${ SensenCli.Paths.CacheDownloaded }`;
+                const cmd = `git clone ${ tpl.URL } ${ $ProjectDir }/.sensen-cache${ ProjectPaths.CacheDownloaded }`;
                         
                 const progressBar = ProgressBar(step, 0)
                 
@@ -84,7 +104,7 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
                         setTimeout(() => {
                             
-                            rimraf(`${ $ProjectDir }/.sensen-cache${ SensenCli.Paths.CacheDownloaded }`, function () {
+                            rimraf(`${ $ProjectDir }/.sensen-cache${ ProjectPaths.CacheDownloaded }`, function () {
                                 // LogMessage('Nettoyage', 'Cache'); 
                             });
 
@@ -92,7 +112,7 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
                         
 
-                        LogMessage('Dépendances', `Téléchargement & Installation...`)
+                        // LogMessage('Dépendances', `Téléchargement & Installation...`)
     
                         BuildProjectDependencies(name) .then(()=>{
     

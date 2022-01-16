@@ -45,6 +45,8 @@ const GetRawFile = require('./GetRawFile');
 
 const SetRawFile = require('./SetRawFile');
 
+const { Grafts } = require('./Grafts.js');
+
 
 
 
@@ -57,24 +59,131 @@ const Kernel = {
     
     VersionString: '0.0.1',
 
-    VersionName: 'Shadow',
+    VersionName: 'Senju',
 
     Resposites:{
+
+        Repo: `https://github.com/IanCarterWork`,
+
+        Raw: `https://raw.githubusercontent.com/IanCarterWork`,
 
         Default: {
 
             URL: `https://github.com/IanCarterWork/sensen-shadow-project.git`
 
-        }
+        },
+
+        CSSGraft: {
+
+            Git: `/sensen-css-graft`
+
+        },
+
+        JSGraft: {
+
+            Git: `/sensen-js-graft`
+
+        },
         
     },
 
 
     Paths:{
 
-        CacheDownloaded: '/.downloaded'
+        CacheDownloaded: '/.downloaded',
+
+        /**
+         * Check if String is URL
+         * @param { string } input 
+         * @returns 
+         */
+        isURL(input){
+            var res = (input||'').match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+            return (res !== null)
+            
+        }
         
     },
+
+
+
+
+
+
+
+    /**
+     * 
+     * @param {{
+     *      url: string,
+     *      encoding?: string,
+     *      start: (request: ClientRequest, total: number) => void,
+     *      progress: (level: {length: number, total: number, purcent: number}) => void,
+     *      done: (body: Array<string>) => void,
+     *      fail: (e: Error) => void,
+     * }} props 
+     * @returns 
+     */
+    Downloader({url, start, progress, done, fail, encoding}){
+
+        const https = require('https');
+
+        const request = https.get(url, function(response) {
+
+            if(encoding){ response.setEncoding(encoding); }
+
+            const level = { purcent: 0, length: 0, total: 0 };
+
+            const len = parseInt(response.headers['content-length'], 10);
+
+            
+            let body = [];
+            
+            let cur = 0;
+            
+            level.total = len / 1048576;
+
+            if(typeof start == 'function'){ start(request, level.total); }
+
+            response.on("data", function(chunk) {
+           
+                body.push( chunk );
+           
+                cur += chunk.length;
+
+                level.purcent = (100.0 * cur / len);
+                // level.purcent = (100.0 * cur / len).toFixed(2);
+
+                level.length = (cur / 1048576);
+
+                // level.total = total.toFixed(2);
+           
+                if(typeof progress == 'function'){ progress(level) }
+           
+            });
+
+
+            response.on("end", ()=>{
+
+                if(typeof done == 'function'){ done(body); }
+           
+            });
+
+
+            request.on("error", (e)=>{
+           
+                console.log("Error: ", e);
+           
+                if(typeof fail == 'function'){ fail(body); }
+           
+            });
+
+
+        }); 
+
+
+        return request;
+
+    }
 
 
 }
@@ -216,6 +325,124 @@ const Command = function(args){
         break;
         
         
+        
+        
+        
+
+
+        /**
+         * Mise à jour : SensenHinata
+         */
+         case '-update:core':
+
+            const cmdcore = `yarn add sensen-hinata`
+
+            LogMessage(
+                `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`
+                , 'Démarrage de la mise à jour du noyau'
+            )
+
+            LogMessage( `$ ${ cmdcore }`,'')
+                
+
+            exec(cmdcore, (err)=>{
+
+                if(err){
+
+                    LogError(
+                        `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`,
+                        'Erreur'
+                    )
+
+                    console.log(err)
+
+                    return;
+                    
+                }
+
+                LogSuccess(
+                    `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`
+                    , 'Mise à jour terminé'
+                )
+
+            })
+
+        break;
+        
+        
+        
+        
+
+
+        /**
+         * Mise à jour : SensenCLI
+         */
+        case '-update:cli':
+
+            const cmdcli = `yarn add sensen`
+
+            LogMessage(
+                `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`
+                , 'Démarrage de la mise à jour du CLI'
+            )
+
+            LogMessage( `$ ${ cmdcli }`,'')
+                
+
+            exec(cmdcli, (err)=>{
+
+                if(err){
+
+                    LogError(
+                        `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`,
+                        'Erreur'
+                    )
+
+                    console.log(err)
+
+                    return;
+                    
+                }
+
+                LogSuccess(
+                    `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`
+                    , 'Mise à jour terminé'
+                )
+
+            })
+
+        break;
+
+
+
+
+
+
+
+        /**
+         * Grèffes
+         */
+        case 'graft':
+
+            const grafts = [];
+
+            if(args[5]){
+
+                for (let x = 0; x < args.length; x++) {
+                    
+                    if(x >= 5){ grafts.push(args[x]) }
+                    
+                }
+
+            }
+
+            Grafts(args[3]||null, args[4]||null, (grafts.length ? grafts : []) || [] )
+        
+        break;
+        
+        
+        
+        
 
 
         /**
@@ -285,6 +512,8 @@ const SensenCli = {
 
 
     Paths : Kernel.Paths,
+
+    Downloader : Kernel.Downloader,
 
     ScanDirectory : ScanDirectory,
 

@@ -25,8 +25,6 @@ const cliProgress = require('cli-progress');
 
 const ProjectManager = require('./project.js')
 
-const SensenCli = require('./Sensen');
-
 const ScanDirectory = require('./ScanDirectory');
 
 const GetRawFile = require('./GetRawFile');
@@ -35,23 +33,29 @@ const SetRawFile = require('./SetRawFile');
 
 const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
+const ProgressBar = require('./ProgressBar')
+
+
+
 
 
 
 /**
  * 
- * @param { '-bind' | '-build' | '-create' | '-artifact' } fn 
+ * @param { '-bind' | '-build' | '-clean:bound' | '-create' | '-artifact' } fn 
  * @param { ?string } theme 
  * @param { ?Array | ?string } arguments 
  */
  const ThemeManager = function(fn, theme, arguments = null){
+
+    const SensenCli = require('./Sensen');
 
     const slugPath = 'theme';
 
     const $ProjectDir = `${ process.cwd() }`;
     
     
-    LogMessage('Gestionnaire de Thème', ``)
+    LogMessage(`Sensen ${ SensenCli.VersionName } ${ SensenCli.Version }/${ SensenCli.VersionString }`, 'Gestionnaire de Thème')
 
     switch(fn){
 
@@ -247,7 +251,7 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
                         store[ theme ][ arti[0] ] = arti[1] || arti[0];
                         
-                        LogMessage(`${ arti[0] } = ${ arti[1] }`, 'lié')
+                        LogMessage('lié', `${ arti[0] } = ${ arti[1] || arti[0] }`)
                 
                     })
 
@@ -286,7 +290,7 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
                                     store[ theme ][ key ] = key;
                                     
-                                    LogMessage(`${ key }`, 'lié')
+                                    LogMessage('lié', `${ key }`)
                     
                                 }
 
@@ -338,6 +342,37 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
 
         break;
+
+
+
+
+
+        
+
+
+        /**
+         * Nettoyer le build
+         */
+        case '-clean:bound':
+
+            /**
+             * Resinitialisation
+             */
+            const cleaner = {}
+
+            /**
+             * Sauvegarde dans le project
+             */
+            ProjectManager.SaveConfig(slugPath, cleaner)
+
+            
+
+        
+        break;
+    
+
+
+
 
 
 
@@ -512,9 +547,39 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
                                              */
                                             if(files.indexOf('index.htm') > -1){
 
-                                                await GetRawFile(`${src}/index.htm`).then(content=>{
+                                                await GetRawFile(`${src}/index.htm`).then(async content=>{
 
-                                                    if(content){ complete({ name: src, content, assets }) }
+                                                    if(content){ 
+                                                            
+                                                        /**
+                                                         * Recherche de l'enfant
+                                                         */
+
+                                                        if(files.indexOf('child.htm') > -1){
+
+                                                            await GetRawFile(`${src}/child.htm`).then(child=>{
+
+                                                                if(child){
+
+                                                                    complete({ name: src, child, content, assets }) 
+
+                                                                }
+
+                                                                else{ complete({ name: src, content, assets }); }
+                                                                
+                                                            })
+
+                                                            .then(er=>{
+
+                                                                complete({ name: src, content, assets });
+                                                    
+                                                            })
+
+                                                        }
+
+                                                        else{ complete({ name: src, content, assets }); }
+                                                    
+                                                    }
 
                                                     else{ LogMessage('Information', 'HTM vide'); }
 
@@ -553,11 +618,16 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
                                 items.map(item=>{
 
-                                    recolts[item.value.name] = {
-                                        html: item.value.content,
-                                        assets: item.value.assets
+                                    if('value' in item){
+
+                                        recolts[item.value.name] = {
+                                            html: item.value.content,
+                                            child: item.value.child||'',
+                                            assets: item.value.assets
+                                        }
+                                        
                                     }
-                                    
+
                                 })
                                 
                                 resolve(recolts)
@@ -589,11 +659,12 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
                 const loaded = {}
 
 
-                if(typeof res[0] == 'object'){
 
-                    if('value' in res[0]){
+                Object.values(res).forEach(rr=>{
 
-                        Object.entries(res[0].value||{}).forEach((e)=>{
+                    if('value' in rr){
+
+                        Object.entries(rr.value||{}).forEach((e)=>{
 
                             loaded[e[0]] = e[1];
                             
@@ -601,9 +672,7 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
         
                     }
 
-                }
-
-
+                })
 
                 
                 /**
@@ -668,11 +737,25 @@ const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
                         const key = `themes/${ entry[0] }/${ artifact[1] }`
 
-                        if(key in loaded){
+                        // console.log('Artifact', key, key in loaded )
+
+                        if((key in loaded)){
+
 
                             LogMessage(`${ entry[0] }/${ artifact[1] }`, `Construit`)
                             
                             content.push(`.Define('${ artifact[1] }',\`${ loaded[key].html||'' }\`)`)
+
+
+                            if('child' in loaded[key]){
+
+                                if( loaded[key].child ){
+
+                                    content.push(`.Define('${ artifact[1] }:child',\`${ loaded[key].child }\`)`)
+
+                                }
+                                
+                            }
                             
 
                             /**

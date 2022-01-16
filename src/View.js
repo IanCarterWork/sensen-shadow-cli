@@ -25,7 +25,7 @@ const cliProgress = require('cli-progress');
  
 const ProjectManager = require('./project.js')
 
-const SensenCli = require('./Sensen');
+// const SensenCli = require('./Sensen');
 
 const ScanDirectory = require('./ScanDirectory');
 
@@ -70,6 +70,9 @@ return `<div class="sensen-view">
      */
     Script(name, route){
 
+        const SensenCli = require('./Sensen');
+    
+
 return ` import SensenHinata from "sensen-hinata";
 /**
 * A Sensen View
@@ -77,8 +80,6 @@ return ` import SensenHinata from "sensen-hinata";
 * @license
 * @sensen ${ SensenCli.VersionName } : ${ SensenCli.Version } (${ SensenCli.VersionString })
 */
-
-
 
 const ${ name }View = new SensenHinata.View({
 
@@ -112,7 +113,7 @@ export default ${ name }View
 
 
 const ViewManager = function(fn, view = "", route = ""){
-
+    
     const $ProjectDir = `${ process.cwd() }`;
     
     LogMessage('Notice', 'View Manager Start')
@@ -169,6 +170,9 @@ const ViewManager = function(fn, view = "", route = ""){
             
         break;
         
+        
+
+
         
 
 

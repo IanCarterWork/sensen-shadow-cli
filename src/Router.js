@@ -53,6 +53,8 @@ const RouterDistritutor = {
      */
     Script(defaultRoute, dependencies, views){
 
+        const SensenCli = require('./Sensen');
+
 return `/**
 * A Sensen Router
 * @package sensen.app.router
@@ -260,11 +262,13 @@ function RouterManager(fn, views = []){
                     /**
                      * Petit système de purge
                      */
-                    if(!(view in store.items)){
+                    if(!(ex.route in store.items)){
 
+                        ex.route = ex.route.toLowerCase();
+                        
                         store.items[ ex.route ] = ex.view
                             
-                        LogSuccess('Liaison', view)
+                        LogSuccess('Liaison', `${ ex.route } (${ ex.view })`)
                     
                     }
 
@@ -637,7 +641,7 @@ function RouterManager(fn, views = []){
 
                         fs.createReadStream(html).pipe(fs.createWriteStream( to ))
 
-                        LogSuccess('Construit', `${ entry[0] } (${ entry[1] })`)
+                        LogSuccess('Construiction', `${ entry[0] } sur ${ entry[1] }View`)
                     
                         build[ entry[0] ] = entry[1] || entry[0];
 
