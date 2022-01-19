@@ -1,0 +1,22 @@
+{
+  "name": "sensen.raw.cli",
+  "version": "0.0.27",
+  "description": "CLI Manager",
+  "type": "commonjs",
+  "main": "./libs/index.js",
+  "types": "./core/index.ts",
+  "license": "MIT",
+  "author": "Yannick GOBOU",
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  },
+  "scripts": {
+    "prepare": "yarn version && npm run build",
+    "watch": "tsc -watch",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@types/node": "^17.0.9",
+    "ts-node": "^10.4.0"
+  }
+}

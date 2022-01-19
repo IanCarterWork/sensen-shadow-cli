@@ -47,6 +47,10 @@ const SetRawFile = require('./SetRawFile');
 
 const { Grafts } = require('./Grafts.js');
 
+const { default: SensenRawCli } = require('sensen.raw.cli');
+
+
+
 
 
 
@@ -151,11 +155,8 @@ const Kernel = {
                 cur += chunk.length;
 
                 level.purcent = (100.0 * cur / len);
-                // level.purcent = (100.0 * cur / len).toFixed(2);
 
                 level.length = (cur / 1048576);
-
-                // level.total = total.toFixed(2);
            
                 if(typeof progress == 'function'){ progress(level) }
            
@@ -205,22 +206,23 @@ const Command = function(args){
 
 
 
-    switch(args[2] || null){
 
+    /**
+     * Create Project
+     */
+    const $Create = (new SensenRawCli.Child({
+         
+        iD: 'create', Title: 'Créer Projet', About: 'un nouveau projet sensen',
 
-        /**
-         * Création d'un nouveau projet
-         */
-        case 'create':
+        Execute(args){
 
-            const name = args[3] || null;
+            SensenRawCli.$Console.Message(`Démarrage`, `${ this.About }`);
+
+            const name = args[0] || null;
             
             if(name){
 
-                const template = args[4] || 'Default';
-
-                // const template = this.Resposites[ tplKey ] || this.Resposites.Default;
-
+                const template = args[1] || 'Default';
 
                 if(template){
 
@@ -228,13 +230,13 @@ const Command = function(args){
 
                         .then(()=>{
 
-                            LogMessage('Fait', 'Project prêt')
+                            SensenRawCli.$Console.Success('Fait', 'Le project est prêt')
                             
                         })
 
                         .catch(err=>{
 
-                            LogError('Erreur', 'Echec lors de creation')
+                            SensenRawCli.$Console.Error('Erreur', 'Echec lors de creation')
                             
                             console.error(err)
 
@@ -244,7 +246,7 @@ const Command = function(args){
 
                 else{
 
-                    LogError('Template Erreur', `Ce template < ${ template } > est introuvable`)
+                    SensenRawCli.$Console.Error('Template Erreur', `Ce template < ${ template } > est introuvable`)
                 
                 }
 
@@ -253,221 +255,908 @@ const Command = function(args){
 
             else{
 
-                LogError('Project Manager', 'Veuillez indiquer le nom de votre projet')
+                SensenRawCli.$Console.Error('Project Manager', 'Veuillez indiquer le nom de votre projet')
                 
             }
 
-        break;
+        },
+    }))
 
 
 
 
+    /**
+     * Gestionnaire de thème
+     */
+    const $Theme = (new SensenRawCli.Child({
+         
+        iD: 'theme', Title: 'Thème', About: 'Gestionnaire de thème',
+
+        Execute(args){
+
+            SensenRawCli.$Console.Notice(`Module`, `Gestionnaire de thème`)
+
+        },
+
+        Children:[
 
 
-        /**
-         * Gestion des Themes
-         */
-        case 'theme':
+            /**
+             * Crée un thème
+             */
+            new SensenRawCli.Child({
 
-            const artifacts = [];
+                iD: '-create', Title:`Création d'un thème`, About:`Un nouveau thème dans votre projet`,
 
-            if(args[5]){
+                Execute([ theme, ]){
 
-                for (let x = 0; x < args.length; x++) {
-                    
-                    if(x >= 5){ artifacts.push(args[x]) }
-                    
+                    if(theme){ ThemeManager('-create', theme); }
+
+                    else{ SensenRawCli.$Console.Error(`Erreur`, `Aucun thème indiqué`) }
+
                 }
-
-            }
-            
-            ThemeManager(args[3]||null, args[4]||null, (artifacts.length ? artifacts : false) || args[5] || '*')
-
-        break;
-        
-        
-        
-
-
-        /**
-         * Gestion des Routers
-         */
-        case 'router':
-
-            const argus = [];
-
-            if(args[4]){
-
-                for (let x = 0; x < args.length; x++) {
-                    
-                    if(x >= 4){ argus.push(args[x]) }
-                    
-                }
-
-            }
-            
-            RouterManager(args[3]||null, (argus.length ? argus : false) || null )
-
-        break;
-        
-        
-        
-        
-
-
-        /**
-         * Gestion des Vues
-         */
-        case 'view':
-
-            ViewManager(args[3]||null, args[4]||null, args[5]||null )
-
-        break;
-        
-        
-        
-        
-        
-
-
-        /**
-         * Mise à jour : SensenHinata
-         */
-         case '-update:core':
-
-            const cmdcore = `yarn add sensen-hinata`
-
-            LogMessage(
-                `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`
-                , 'Démarrage de la mise à jour du noyau'
-            )
-
-            LogMessage( `$ ${ cmdcore }`,'')
                 
-
-            exec(cmdcore, (err)=>{
-
-                if(err){
-
-                    LogError(
-                        `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`,
-                        'Erreur'
-                    )
-
-                    console.log(err)
-
-                    return;
-                    
-                }
-
-                LogSuccess(
-                    `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`
-                    , 'Mise à jour terminé'
-                )
-
-            })
-
-        break;
-        
-        
-        
-        
+            }),
 
 
-        /**
-         * Mise à jour : SensenCLI
-         */
-        case '-update:cli':
-
-            const cmdcli = `yarn add sensen`
-
-            LogMessage(
-                `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`
-                , 'Démarrage de la mise à jour du CLI'
-            )
-
-            LogMessage( `$ ${ cmdcli }`,'')
-                
-
-            exec(cmdcli, (err)=>{
-
-                if(err){
-
-                    LogError(
-                        `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`,
-                        'Erreur'
-                    )
-
-                    console.log(err)
-
-                    return;
-                    
-                }
-
-                LogSuccess(
-                    `Sensen ${ Kernel.VersionName } ${ Kernel.Version }/${ Kernel.VersionString }`
-                    , 'Mise à jour terminé'
-                )
-
-            })
-
-        break;
-
-
-
-
-
-
-
-        /**
-         * Grèffes
-         */
-        case 'graft':
-
-            const grafts = [];
-
-            if(args[5]){
-
-                for (let x = 0; x < args.length; x++) {
-                    
-                    if(x >= 5){ grafts.push(args[x]) }
-                    
-                }
-
-            }
-
-            Grafts(args[3]||null, args[4]||null, (grafts.length ? grafts : []) || [] )
-        
-        break;
-        
-        
-        
-        
-
-
-        /**
-         * No Command
-         */
-        default:
-
-            LogMessage( 'Sensen', `${ this.VersionName }, ${ this.Version } (${ this.VersionString })` );
-
-            LogMessage('sensen create "project-name"', 'Créer un nouveau projet ')
-
-            LogMessage('sensen theme -create "theme-name"', 'Créer un nouveau theme ')
-
-            LogMessage('sensen theme -bind "theme-name" *', 'Lier tous les artéfact d\'un thème  ')
             
-            LogMessage('sensen theme -bind "theme-name" [..."artifact-var-name = artifact-name"] ', 'Lier un ou plusieurs artéfacts à d\'un thème')
 
-            LogMessage('sensen theme -build', 'Construire le bundle des thèmes et artéfacts de thème liés')
-        
 
-        break;
+            /**
+             * Crée un artéfact de thème
+             */
+            new SensenRawCli.Child({
 
+                iD: '-artifact', Title:`Création d'un artéfact de thème`, About:`Un nouvel artéfact de thème`,
+
+                Execute(args){
+
+                    if(args[0]){ 
+
+                        ThemeManager('-artifact', args[0], SensenRawCli.Create.Args(args, 1)); 
+                        
+                    }
+
+                    else{ SensenRawCli.$Console.Error(`Erreur`, `Aucun thème indiqué`) }
+
+                    
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Crée un artéfact de thème
+             */
+            new SensenRawCli.Child({
+
+                iD: '-bind', Title:`Lier un thème et/ou des artefacts`, About:`Créer une liaison pour la construction`,
+
+                Execute(args){
+
+                    if(args[0]){ 
+
+                        const artifacts = SensenRawCli.Create.Args(args, 1)
+
+                        ThemeManager('-bind', args[0], (artifacts.length ? artifacts : false) || args[1] || '*'); 
+                        
+                    }
+
+                    else{ SensenRawCli.$Console.Error(`Erreur`, `Aucun thème indiqué`) }
+
+                    
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Nettoyer les liaisons
+             */
+            new SensenRawCli.Child({
+
+                iD: '-clean:bound', Title:`Nettoyer les liaisons`, About:``,
+
+                Execute(args){
+
+                    ThemeManager('-clean:bound', args[0], SensenRawCli.Create.Args(args, 1)); 
+                       
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Construction du bundle
+             */
+            new SensenRawCli.Child({
+
+                iD: '-build', Title:`Construction du bundle à partir des liaisons`, About:``,
+
+                Execute(args){
+
+                    ThemeManager('-build', args[0], SensenRawCli.Create.Args(args, 1)); 
+                       
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Construction du bundle
+             */
+            new SensenRawCli.Child({
+
+                iD: '-build', Title:`Construction du bundle à partir des liaisons`, About:``,
+
+                Execute(args){
+
+                    ThemeManager('-build', args[0], SensenRawCli.Create.Args(args, 1)); 
+                       
+                }
+                
+            }),
+
+            
+        ]
         
+    }))
+
+
+
+
+
+
+
+
+    /**
+     * Gestionnaire de vues
+     */
+     const $View = (new SensenRawCli.Child({
+         
+        iD: 'view', Title: 'Vue', About: 'Gestionnaire de vues',
+
+        Execute(args){
+
+            SensenRawCli.$Console.Notice(`Module`,`Gestionnaire de vues`)
+
+        },
+
+        Children:[
+
+
+            
+
+
+            /**
+             * Création d'une vue
+             */
+             new SensenRawCli.Child({
+
+                iD: '-create', Title:`Creation de vues`, About:`Un nouvelle vue dans le project`,
+
+                Execute([view, route]){
+
+                    if(view){
+
+                        ViewManager('-create', view, route); 
+
+                    }
+
+                    else{
+
+                        SensenRawCli.$Console.Error(`Erreur`, `Aucune vue indiqué`)
+                        
+                    }
+                       
+                }
+                
+            }),
+
+
+
+
+        ]
+
+    }))
+
+
+
+
+
+
+
+    
+
+    /**
+     * Gestionnaire de route
+     */
+     const $Router = (new SensenRawCli.Child({
+         
+        iD: 'route', Title: 'Vue', About: 'Gestionnaire de vues',
+
+        Execute(args){
+
+            SensenRawCli.$Console.Notice(`Module`,`Gestionnaire de vues`)
+
+        },
+
+        Children:[
+
+
+            
+
+
+            /**
+             * Definition du point d'entré de l'application
+             */
+             new SensenRawCli.Child({
+
+                iD: '-default:view', Title:`Definition du point d'entré`, About:`Vue par defaut`,
+
+                Execute([view]){
+
+                    if(view){
+
+                        RouterManager('-default:view', view); 
+
+                    }
+
+                    else{
+
+                        SensenRawCli.$Console.Error(`Erreur`)
+                        
+                    }
+                       
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Liaison d'une vue au router
+             */
+             new SensenRawCli.Child({
+
+                iD: '--bind:view', Title:`Liaison au router`, About:`ajouter une vue`,
+
+                Execute(args){
+
+                    if(args.length){
+
+                        RouterManager('-bind:view', args); 
+
+                    }
+
+                    else{
+
+                        SensenRawCli.$Console.Error(`Erreur`)
+                        
+                    }
+                       
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Liaison d'une vue au router
+             */
+             new SensenRawCli.Child({
+
+                iD: '-unbind:view', Title:`Liaison au router`, About:`supprimer une vue`,
+
+                Execute(args){
+
+                    if(args.length){
+
+                        RouterManager('-unbind:view', args); 
+
+                    }
+
+                    else{
+
+                        SensenRawCli.$Console.Error(`Erreur`)
+                        
+                    }
+                       
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Liaison d'une vue au router
+             */
+             new SensenRawCli.Child({
+
+                iD: '-bound', Title:`Liaison au router`, About:`Lister toutes les liaisons`,
+
+                Execute(args){
+
+                    if(args.length){
+
+                        RouterManager('-bound', args); 
+
+                    }
+
+                    else{
+
+                        SensenRawCli.$Console.Error(`Erreur`)
+                        
+                    }
+                       
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Liaison d'une vue au router
+             */
+             new SensenRawCli.Child({
+
+                iD: '-purge', Title:`Nettoyage le router`, About:`Supprime toutes les vues qui n'existe plus`,
+
+                Execute(args){
+
+                    RouterManager('-purge', args); 
+
+                       
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Liaison d'une vue au router
+             */
+             new SensenRawCli.Child({
+
+                iD: '-clean', Title:`Nettoyage le router`, About:`Supprime toutes les vues sans exception`,
+
+                Execute(args){
+
+                    RouterManager('-clean', args); 
+
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Construire une vue dans le router
+             */
+             new SensenRawCli.Child({
+
+                iD: '-build:index', Title:`Construction du router`, About:`Construire une vue dans le router`,
+
+                Execute(args){
+
+                    RouterManager('-build:index', args); 
+
+                }
+                
+            }),
+
+
+            
+
+
+            /**
+             * Construire une vue dans le router
+             */
+             new SensenRawCli.Child({
+
+                iD: '-build', Title:`Construction du router`, About:`Construire les routes`,
+
+                Execute(args){
+
+                    RouterManager('-build', args); 
+
+                }
+                
+            }),
+
+
+
+
+
+
+        ]
+
+    }))
+
+
+
+
+
+
+
+
+
+    /**
+     * Gestionnaire de route
+     */
+        const $Graft = (new SensenRawCli.Child({
+            
+        iD: 'graft', Title: 'Grèffes', About: 'Gestionnaire de greffons',
+
+        Execute(args){
+
+            SensenRawCli.$Console.Notice(`Module`,`${ this.About }`)
+
+        },
+
+        Children:[
+
+
+            
+
+
+            /**
+             * Faire un grèffes CSS
+             */
+             new SensenRawCli.Child({
+
+                iD: 'css', Title:`Faire une grèffe CSS`, About:`Ajout de grèffes`,
+
+                Execute(args){
+
+                    SensenRawCli.$Console.Notice(`Sous-Module`,`${ this.About }`)
+
+                },
+
+                Children:[
+
+
+                    new SensenRawCli.Child({
+
+                        iD: '-add', Title:`Construction de grèffe`, About:`Ajout de grèffes`,
+
+                        Execute(args){
+
+                            GraftsManager('-add', args); 
+
+                        },
+
+                    }),
+
+
+                    new SensenRawCli.Child({
+
+                        iD: '-remove', Title:`Déstruction de grèffe`, About:`Supprèssion de grèffes`,
+
+                        Execute(args){
+
+                            GraftsManager('-remove', args); 
+
+                        },
+
+                    }),
+
+                    
+                ]
+                
+            }),
+
+
+
+            
+
+
+            /**
+             * Faire un grèffes JS
+             */
+             new SensenRawCli.Child({
+
+                iD: 'js', Title:`Faire une grèffe JS`, About:`Ajout de grèffes`,
+
+                Execute(args){
+
+                    SensenRawCli.$Console.Notice(`Sous-Module`,`${ this.About }`)
+
+                },
+
+                Children:[
+
+
+                    new SensenRawCli.Child({
+
+                        iD: '-add', Title:`Construction de grèffe`, About:`Ajout de grèffes`,
+
+                        Execute(args){
+
+                            GraftsManager('-add', args); 
+
+                        },
+
+                    }),
+
+
+                    new SensenRawCli.Child({
+
+                        iD: '-remove', Title:`Déstruction de grèffe`, About:`Supprèssion de grèffes`,
+
+                        Execute(args){
+
+                            GraftsManager('-remove', args); 
+
+                        },
+
+                    }),
+
+                    
+                ]
+                
+            }),
+
+
+            
+
+
+
+        ]
+
+    }))
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Mise à niveau
+     */
+        const $Upgrader = (new SensenRawCli.Child({
+            
+        iD: 'upgrade', Title: 'Mise à niveau', About: '',
+
+        Execute(args){
+
+            SensenRawCli.$Console.Notice(`Module`,`${ this.Title }`)
+
+        },
+
+        Children:[
+
+
+            
+
+
+            /**
+             * Mise à niveau du noyau
+             */
+             new SensenRawCli.Child({
+
+                iD: '--core', Title:`Mise à niveau`, About:`Noyau`,
+
+                Execute(args){
+
+                    return `yarn add sensen-hinata`
+
+                },
+
+                Emit:{
+
+                    Begin(args){
+
+                        SensenRawCli.$Console.Notice( `Mise à niveau` , 'Noyau Sensen' )
+
+                    },
+                    
+                    Error(args){
+
+                        SensenRawCli.$Console.Error( `Erreur`, `Impossible de terminer l'opération` )
+
+                        console.log(err)
+
+                    },
+                    
+                    End(args){
+                        
+                        SensenRawCli.$Console.Success( `Succès` , 'Mise à jour terminé' )
+
+                    },
+                    
+                }
+
+            }),
+
+
+            
+
+
+            /**
+             * Mise à niveau du noyau
+             */
+             new SensenRawCli.Child({
+
+                iD: '--cli', Title:`Mise à niveau`, About:`CLI`,
+
+                Execute(args){
+
+                    return `yarn add sensen`
+
+                },
+
+                Emit:{
+
+                    Begin(args){
+
+                        SensenRawCli.$Console.Notice( `Mise à niveau` , 'Ligne Commandes Sensen' )
+
+                    },
+                    
+                    Error(args){
+
+                        SensenRawCli.$Console.Error( `Erreur`, `Impossible de terminer l'opération` )
+
+                        console.log(err)
+
+                    },
+                    
+                    End(args){
+                        
+                        SensenRawCli.$Console.Success( `Succès` , 'Mise à jour terminé' )
+
+                    },
+                    
+                }
+
+
+            }),
+
+
+            
+
+
+
+        ]
+
+    }))
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Montage
+     */
+    const $Mount = (new SensenRawCli.Child({
+            
+        iD: '--mount', Title: 'Mise à niveau', About: '',
+
+        Execute(args){
+
+            return `yarn mount`
+
+        },
+
+        Emit:{
+
+            Begin(args){
+
+                SensenRawCli.$Console.Notice( `Montage` , 'Bundle' )
+
+            },
+            
+            Error(args){
+
+                SensenRawCli.$Console.Error( `Erreur`, `Impossible de terminer l'opération` )
+
+                console.log(err)
+
+            },
+            
+            End(args){
+                
+                SensenRawCli.$Console.Notice( `Succès` , 'Construction terminé' )
+
+            },
+            
+        }
+
+
+    }))
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * COmpilation automatique
+     */
+    const $Serve = (new SensenRawCli.Child({
+            
+        iD: '--serve', Title: 'Mise à niveau', About: '',
+
+        Execute(args){
+
+            return `yarn serve`
+
+        },
+
+        Emit:{
+
+            Begin(args){
+
+                SensenRawCli.$Console.Notice( `Compilation` , 'Automatique du Bundle' )
+
+            },
+            
+            Error(args){
+
+                SensenRawCli.$Console.Error( `Erreur`, `Impossible de terminer l'opération` )
+
+                console.log(err)
+
+            },
+            
+            End(args){
+                
+                SensenRawCli.$Console.Success( `Succès` , '' )
+
+            },
+            
+        }
+
+
+    }))
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Construction de l'application
+     */
+    const $Build = (new SensenRawCli.Child({
+            
+        iD: '--serve', Title: 'Construction de l\'application', About: '',
+
+        Execute(args){
+
+            return `yarn build`
+
+        },
+
+        Emit:{
+
+            Begin(args){
+
+                SensenRawCli.$Console.Notice( `Compilation` , 'Automatique du Bundle' )
+
+            },
+            
+            Error(args){
+
+                SensenRawCli.$Console.Error( `Erreur`, `Impossible de terminer l'opération` )
+
+                console.log(err)
+
+            },
+            
+            End(args){
+                
+                SensenRawCli.$Console.Success( `Succès` , '' )
+
+            },
+            
+        }
+
+
+    }))
+
+
+
+
+
+
+
+
+    /**
+     * Déclarations
+     */
+    const state = (new SensenRawCli.Create({
+
+        iD: 'sensen',
+
+        Title: 'Sensen CLI',
         
-    }
+        About: 'Sensen Project Manager',
+        
+        Execute(args){
+
+            SensenRawCli.$Console.Message(`Sensen CLI`)
+
+        },
+        
+    }))
+
+
+
+    .Add( $Create )
+
+    .Add( $Theme )
+
+    .Add( $View )
+
+    .Add( $Graft )
+
+    .Add( $Upgrader )
+
+    .Add( $Mount )
+
+    .Add( $Serve )
+
+    .Add( $Build )
+    
+
+
+    /**
+     * Run Command manager
+     */
+    .Run(
+
+        SensenRawCli.Create.Args( args, 2 )
+
+    )
+
+;
     
 
     return SensenCli

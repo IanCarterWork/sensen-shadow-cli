@@ -33,7 +33,8 @@ const SetRawFile = require('./SetRawFile');
 
 const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js')
 
-const ProgressBar = require('./ProgressBar')
+const ProgressBar = require('./ProgressBar');
+const { default: SensenRawCli } = require('sensen.raw.cli');
 
 
 
@@ -55,7 +56,7 @@ const ProgressBar = require('./ProgressBar')
     const $ProjectDir = `${ process.cwd() }`;
     
     
-    LogMessage(`Sensen ${ SensenCli.VersionName } ${ SensenCli.Version }/${ SensenCli.VersionString }`, 'Gestionnaire de Thème')
+    // LogMessage(`Sensen ${ SensenCli.VersionName } ${ SensenCli.Version }/${ SensenCli.VersionString }`, 'Gestionnaire de Thème')
 
     switch(fn){
 
@@ -95,13 +96,13 @@ const ProgressBar = require('./ProgressBar')
                     `)
 
 
-                    LogSuccess(theme, 'Créée avec succès')
+                    SensenRawCli.$Console.Success(`Succès`, `${ theme } ajouté au projet`)
                         
                 }
 
                 else{
 
-                    LogError(theme, 'Ce thème existe déjà')
+                    SensenRawCli.$Console.Error(`Erreur`, `Ce thème < ${ theme } > existe déjà dans ce projet`)
                         
                 }
                 
@@ -109,7 +110,7 @@ const ProgressBar = require('./ProgressBar')
 
             else{
 
-                LogError('Erreur', `Veuillez donner un nom à votre thème`)
+                SensenRawCli.$Console.Error('Erreur', `Veuillez donner un nom à votre thème`)
                 
             }
 

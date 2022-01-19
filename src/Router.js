@@ -35,6 +35,7 @@ const SetRawFile = require('./SetRawFile');
 
 const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js');
 const Module = require('module');
+const { default: SensenRawCli } = require('sensen.raw.cli');
 
 
 
@@ -205,7 +206,7 @@ function RouterManager(fn, views = []){
     
                     store.options.default = (typeof view == 'string' && view) ? view : store.options.default;
                     
-                    LogSuccess('Vue par defaut', view)
+                    SensenRawCli.$Console.Success('Vue par defaut', view)
      
                     
                     ProjectManager.SaveConfig(projectSlug, store)
@@ -214,17 +215,17 @@ function RouterManager(fn, views = []){
 
                 else{
 
-                    LogError('Router', `Route non valide`)
+                    SensenRawCli.$Console.Error('Router', `Route non valide`)
                 
                 }
                 
-                LogMessage('Terminé', '')
+                SensenRawCli.$Console.Notice('Terminé', '')
  
             }
 
             else{
 
-                LogError('Router', `Veuillez indiquer de la vue à definir par defaut`)
+                SensenRawCli.$Console.Error('Router', `Veuillez indiquer de la vue à definir par defaut`)
                 
             }
 
@@ -264,17 +265,17 @@ function RouterManager(fn, views = []){
                      */
                     if(!(ex.route in store.items)){
 
-                        ex.route = ex.route.toLowerCase();
+                        ex.route = ex.route;
                         
                         store.items[ ex.route ] = ex.view
                             
-                        LogSuccess('Liaison', `${ ex.route } (${ ex.view })`)
+                        SensenRawCli.$Console.Success('Liaison', `${ ex.route } (${ ex.view })`)
                     
                     }
 
                     else{
 
-                        LogMessage('Existe déjà', view)
+                        SensenRawCli.$Console.Notice('Existe déjà', view)
  
                     }
                         
@@ -284,14 +285,14 @@ function RouterManager(fn, views = []){
 
                 ProjectManager.SaveConfig(projectSlug, store)
 
-                LogMessage('Terminé', '')
+                SensenRawCli.$Console.Notice('Terminé', '')
  
                 
             }
 
             else{
 
-                LogError('Router', `Veuillez indiquer de la vue à definir par defaut`)
+                SensenRawCli.$Console.Error('Router', `Veuillez indiquer de la vue à definir par defaut`)
                 
             }
 
@@ -329,7 +330,7 @@ function RouterManager(fn, views = []){
 
                     if((e[0] in $views)){
 
-                        LogError(`Supprimé`, e[0])
+                        SensenRawCli.$Console.Error(`Supprimé`, e[0])
                     
                     }
 
@@ -348,14 +349,14 @@ function RouterManager(fn, views = []){
 
                 ProjectManager.SaveConfig(projectSlug, store)
 
-                LogMessage('Terminé', '')
+                SensenRawCli.$Console.Notice('Terminé', '')
  
                 
             }
 
             else{
 
-                LogError('Router', `Veuillez indiquer de la vue à definir par defaut`)
+                SensenRawCli.$Console.Error('Router', `Veuillez indiquer de la vue à definir par defaut`)
                 
             }
 
@@ -384,12 +385,12 @@ function RouterManager(fn, views = []){
 
                 Object.entries(bound.items).forEach(e=>{
 
-                    LogSuccess(`lié`, `${e[0]} (${e[1]})`)
+                    SensenRawCli.$Console.Success(`lié`, `${e[0]} (${e[1]})`)
                     
                 })
 
 
-                LogMessage('Terminé', '')
+                SensenRawCli.$Console.Notice('Terminé', '')
  
                
 
@@ -428,7 +429,7 @@ function RouterManager(fn, views = []){
 
                         if(routes.indexOf(e[0]) === -1){
                             
-                            LogError('Purgé', `${ e[0] }`)
+                            SensenRawCli.$Console.Error('Purgé', `${ e[0] }`)
 
                         }
 
@@ -436,29 +437,29 @@ function RouterManager(fn, views = []){
 
                             found[ e[0] ] = e[1]
 
-                            LogSuccess('Valide', `${ e[0] }`)
+                            SensenRawCli.$Console.Success('Valide', `${ e[0] }`)
 
                         }
 
                     })
 
 
-                    // LogMessage('Output', found)
-                    // LogMessage('Output', store.items)
-                    // LogMessage('Output', routes)
+                    // SensenRawCli.$Console.Notice('Output', found)
+                    // SensenRawCli.$Console.Notice('Output', store.items)
+                    // SensenRawCli.$Console.Notice('Output', routes)
 
 
                     store.items = found;
 
                     ProjectManager.SaveConfig(projectSlug, store)
     
-                    LogMessage('Terminé', '')
+                    SensenRawCli.$Console.Notice('Terminé', '')
      
                 }
 
                 else{
 
-                    LogMessage('Terminé', 'Le dossier de vues est vide')
+                    SensenRawCli.$Console.Notice('Terminé', 'Le dossier de vues est vide')
 
                 }
                 
@@ -487,7 +488,7 @@ function RouterManager(fn, views = []){
 
             ProjectManager.SaveConfig(projectSlug, data)
 
-            LogMessage('Terminé', '')
+            SensenRawCli.$Console.Notice('Terminé', '')
 
         break;
         
@@ -557,7 +558,7 @@ function RouterManager(fn, views = []){
 
                         .catch(er=>{
 
-                            LogMessage('Notice', `Erreur lors de la récupération des index de < ${ entry[0] } >`)
+                            SensenRawCli.$Console.Notice('Notice', `Erreur lors de la récupération des index de < ${ entry[0] } >`)
 
                             console.log(er)
                             
@@ -568,9 +569,9 @@ function RouterManager(fn, views = []){
 
                     else{
 
-                        LogError('Notice', `${ entry[0] } n'est pas un dossier de vue`)
+                        SensenRawCli.$Console.Warning('Notice', `${ entry[0] } n'est pas un dossier de vue`)
                     
-                        LogMessage('Notice', `Si ${ entry[0] } est un dossier vérifié qu'il possède le fichier index.html`)
+                        SensenRawCli.$Console.Notice('Notice', `Si ${ entry[0] } est un dossier vérifié qu'il possède le fichier index.html`)
 
                     }
 
@@ -578,7 +579,7 @@ function RouterManager(fn, views = []){
 
                 else{
 
-                    LogError('Pas de liaison', `${ entry[0] }`)
+                    SensenRawCli.$Console.Error('Pas de liaison', `${ entry[0] }`)
                     
                 }
                 
@@ -641,7 +642,7 @@ function RouterManager(fn, views = []){
 
                         fs.createReadStream(html).pipe(fs.createWriteStream( to ))
 
-                        LogSuccess('Construiction', `${ entry[0] } sur ${ entry[1] }View`)
+                        SensenRawCli.$Console.Success('Construiction', `${ entry[0] } sur ${ entry[1] }View`)
                     
                         build[ entry[0] ] = entry[1] || entry[0];
 
@@ -649,9 +650,9 @@ function RouterManager(fn, views = []){
 
                     else{
 
-                        LogError('Notice', `${ entry[0] } n'est pas un dossier de vue`)
+                        SensenRawCli.$Console.Error('Notice', `${ entry[0] } n'est pas un dossier de vue`)
                     
-                        LogMessage('Notice', `Si ${ entry[0] } est un dossier vérifié qu'il possède le fichier index.html`)
+                        SensenRawCli.$Console.Notice('Notice', `Si ${ entry[0] } est un dossier vérifié qu'il possède le fichier index.html`)
 
                     }
 
@@ -659,11 +660,11 @@ function RouterManager(fn, views = []){
 
                 else{
 
-                    LogError('Pas de liaison', `${ entry[0] }`)
+                    SensenRawCli.$Console.Error('Pas de liaison', `${ entry[0] }`)
                     
                 }
                 
-                // LogSuccess(`lié`, view)
+                // SensenRawCli.$Console.Success(`lié`, view)
                 
             })
 
@@ -687,11 +688,11 @@ function RouterManager(fn, views = []){
 
             
 
-            // LogMessage('Dependencies', dependencies)
+            // SensenRawCli.$Console.Notice('Dependencies', dependencies)
 
-            // LogMessage('generate', generate)
+            // SensenRawCli.$Console.Notice('generate', generate)
 
-            // LogMessage('Script', gen)
+            // SensenRawCli.$Console.Notice('Script', gen)
             
             SetRawFile(
 
@@ -710,7 +711,7 @@ function RouterManager(fn, views = []){
             )
 
 
-            LogMessage('Terminé', '')
+            SensenRawCli.$Console.Notice('Terminé', '')
 
 
         break;
@@ -721,7 +722,7 @@ function RouterManager(fn, views = []){
 
         default:
 
-            LogError('Erreur', 'Fonction non valide')
+            SensenRawCli.$Console.Error('Erreur', 'Fonction non valide')
 
         break;
         

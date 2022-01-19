@@ -36,6 +36,7 @@ const SetRawFile = require('./SetRawFile');
 const { LogError, LogMessage, LogSuccess } = require('./LogNotice.js');
 
 const RouterManager = require('./Router');
+const { default: SensenRawCli } = require('sensen.raw.cli');
 
 
 
@@ -116,7 +117,7 @@ const ViewManager = function(fn, view = "", route = ""){
     
     const $ProjectDir = `${ process.cwd() }`;
     
-    LogMessage('Notice', 'View Manager Start')
+    // LogMessage('Notice', 'View Manager Start')
 
 
     switch(fn){
@@ -154,7 +155,7 @@ const ViewManager = function(fn, view = "", route = ""){
 
                 else{
 
-                    LogError('Erreur', `${ route } existe dans le dossier des vue`)
+                    SensenRawCli.$Console.Warning('Attention', `${ route } existe dans le dossier des vue`)
                 
                 }
                 
@@ -163,7 +164,7 @@ const ViewManager = function(fn, view = "", route = ""){
 
             else{
 
-                LogError('Erreur', 'Veuillez indiquer le nom de la vue et sa route')
+                SensenRawCli.$Console.Error('Erreur', 'Veuillez indiquer le nom de la vue et sa route')
                 
             }
             
